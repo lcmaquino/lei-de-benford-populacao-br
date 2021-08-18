@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+import numpy as np
 import pandas as pd
 from src.LeiDeBenford import *
 
@@ -12,29 +13,28 @@ coluna = "POPULACAO_ESTIMADA"
 lb = LeiDeBenford(arquivoDeDados, coluna)
 
 """
+    Determinar a frequência absoluta dos algarimos no primeiro dígito dos dados
+    da população.
+"""
+print(f"[DÍGITO  |  FREQUÊNCIA ABSOLUTA  |  LEI DE BENFORD  |  ERRO (%)]")
+frequenciaAbsoluta = lb.frequenciaAbsoluta()
+totalDeMunicipios = sum(frequenciaAbsoluta)
+leiDeBenford = [totalDeMunicipios*(np.log10(d + 1) - np.log10(d)) for d in range(1, 10)]
+erroPercentual = [frequenciaAbsoluta[i]/leiDeBenford[i] - 1.0 for i in range(len(frequenciaAbsoluta))]
+for i in range(9):
+    print(f"{i + 1}     {frequenciaAbsoluta[i]}     {leiDeBenford[i]:5.2f}     {erroPercentual[i]:5.2f}")
+
+print("")
+
+"""
     Determinar a ordem de grandeza entre a diferença da população dos municípios
     com menor e maior habitantes.
 """
 print(f"ORDEM DE GRANDEZA NOS DADOS")
-lb.ordemDeGradeza()
-print("")
-
-"""
-    Determinar a frequência relativa dos algarimos no primeiro dígito dos dados
-    da população.
-"""
-print(f"[DÍGITO  |  FREQUÊNCIA RELATIVA]")
-frequenciaRelativa = lb.frequenciaRelativa()
-for i in range(9):
-    print(f"{i + 1}  {frequenciaRelativa[i]:5.2f}")
-
-print("")
-
-"""
-    Aplicar o Teste de Aderência Qui-quadrado.
-"""
-print(f"TESTE DE ADERÊNCIA QUI-QUADRADO")
-lb.testarAderencia(frequenciaRelativa)
+minimo, maximo, ordemDeGrandeza = lb.ordemDeGradeza()
+print(f"MENOR POPULÇÃO: \n{minimo}\n")
+print(f"MAIOR POPULÇÃO: \n{maximo}\n")
+print(f"ordemDeGrandeza(maximo - minimo) = 10^{ordemDeGrandeza}")
 print("")
 
 """
@@ -42,6 +42,6 @@ print("")
     da lei de Benford.
 """
 arquivoGrafico = "data/teste-de-aderencia-populacao-br.png"
-titulo = "FREQUÊNCIA RELATIVA DO PRIMEIRO DÍGITO"
+titulo = "FREQUÊNCIA ABSOLUTA DO PRIMEIRO DÍGITO"
 print(f"SALVANDO O GRÁFICO: {arquivoGrafico}")
-lb.grafico(frequenciaRelativa, arquivoGrafico, titulo)
+lb.grafico(frequenciaAbsoluta, arquivoGrafico, titulo)
